@@ -1,11 +1,14 @@
-# fast-trips_demand_converter
+# SF-CHAMP to Fast-Trips Demand Data Converter
 
-Converts disaggregate SF-CHAMP Activity-Based Travel Model demand to [Fast-Trips](https://github.com/MetropolitanTransportationCommission/fast-trips) input demand.
+Converts disaggregate SF-CHAMP Activity-Based Travel Model demand to [Fast-Trips](https://github.com/MetropolitanTransportationCommission/fast-trips) input demand using time of day distributions from observed transit boardings and alightings.
 
 `python convert_demand.py`
 
-Reads:     `TRIPMC.H51` (SF-CHAMP trip file in HDF5 format)
-Writes:    [`household.txt`](https://github.com/osplanning-data-standards/dyno-demand/blob/master/files/household.md), [`person.txt`](https://github.com/osplanning-data-standards/dyno-demand/blob/master/files/person.md), and [`trip_list.txt`](https://github.com/osplanning-data-standards/dyno-demand/blob/master/files/trip_list.md) (input demand to [Fast-Trips](https://github.com/MetropolitanTransportationCommission/fast-trips) in [Dyno-Demand](https://github.com/osplanning-data-standards/dyno-demand) format)
+Reads:     `TRIPMC.H51` (SF-CHAMP trip file in HDF5 format)  
+Writes:    Input demand to [Fast-Trips](https://github.com/MetropolitanTransportationCommission/fast-trips) in [Dyno-Demand](https://github.com/osplanning-data-standards/dyno-demand) format:  
+ - [`household.txt`](https://github.com/osplanning-data-standards/dyno-demand/blob/master/files/household.md)
+ - [`person.txt`](https://github.com/osplanning-data-standards/dyno-demand/blob/master/files/person.md)
+ - [`trip_list.txt`](https://github.com/osplanning-data-standards/dyno-demand/blob/master/files/trip_list.md) 
 
 Configuration: [`config.py`](https://github.com/sfcta/fast-trips_demand_converter/blob/master/config.py)
 
