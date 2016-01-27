@@ -16,6 +16,6 @@ Default time-of-day CDFs derived from 2012 [MUNI](http://www.sfmta.com) [APC](ht
  - [`PreferredDepartureTime.dat`](https://github.com/sfcta/fast-trips_demand_converter/blob/master/PreferredDepartureTime.dat)  
  - [`PreferredArrivalTime.dat`](https://github.com/sfcta/fast-trips_demand_converter/blob/master/PreferredArrivalTime.dat)
 
-This is based on the a script originally written by [Lisa Zorn](https://github.com/lmz) and [Alireza Khani](https://github.com/akhani) in 2012:
+This is based on a script originally written by [Lisa Zorn](https://github.com/lmz) and [Alireza Khani](https://github.com/akhani) in 2012:
 `Q:\Model Development\FastTrips\Demand.CHAMP\ft_CHAMPdemandGenerator.py`
 
