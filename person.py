@@ -191,9 +191,15 @@ class Person(object):
     def getTripMode(self, modecode, segdir):
         
         if modecode < 17:
-            return 'walk-transit'
+            return 'walk-transit-walk'
         else:
-            return 'drive-transit'
+            if segdir == 1:
+                access_mode = 'PNR'
+                egress_mode = 'walk'
+            else:
+                access_mode = 'walk'
+                egress_mode = 'PNR'
+            return access_mode + '-transit-' + egress_mode 
         
 #         submodes = ['local_bus', 'light_rail', 'premium', 'ferry', 'bart']
 #         if modecode < 17:
