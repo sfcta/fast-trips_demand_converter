@@ -42,3 +42,27 @@ def chooseTimeFromDistribution(distribution):
         prev_cdf = distribution[idx][1]
 
     raise Exception("chooseTimeFromDistribution: should never get here")
+
+def getIntTrips(scaling_factor):
+    """
+    Given a float number of trips, rounds up or down based on the probability corresponding to the fractional part.
+        
+    For example: if 3.2 is passed, this will return 3 with probability 0.8 and 4 with probability 0.2
+    """ 
+    
+    r = random.random() # in [0.0, 1.0)
+    multiplier = int(scaling_factor)
+    prob_scaling_factor = scaling_factor - multiplier
+    if r < prob_scaling_factor:
+        return multiplier + 1
+    else:
+        return multiplier
+
+def convertTripTime(triptime):
+    if int(triptime) > 0:
+        hour = int(triptime/60)
+        minute = triptime % 60
+        return '%02d:%02d:00' %(hour,minute)
+    else:
+        return ''
+    

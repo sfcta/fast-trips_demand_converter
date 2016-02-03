@@ -176,7 +176,7 @@ class Person(object):
                           (person_id,trip[Person.IDX_OTAZ], trip[Person.IDX_DTAZ],
                            self.getTripMode(trip[Person.IDX_TRIPMODE], trip[Person.IDX_SEGDIR]),
                            self.getTripPurpose(trip[Person.IDX_PURPOSE]),
-                           self.convertTripTime(trip[Person.IDX_PREF_DEP]), self.convertTripTime(trip[Person.IDX_PREF_ARR]),
+                           convertTripTime(trip[Person.IDX_PREF_DEP]), convertTripTime(trip[Person.IDX_PREF_ARR]),
                            time_target, vot,''))
     
     def write_temp(self, outfile):
@@ -215,14 +215,6 @@ class Person(object):
 #                 access_mode = 'walk'
 #                 egress_mode = 'PNR'
 #         return access_mode + '-' + transit_mode + '-' + egress_mode       
-    
-    def convertTripTime(self, triptime):
-        if int(triptime) > 0:
-            hour = int(triptime/60)
-            minute = triptime % 60
-            return '%02d:%02d:00' %(hour,minute)
-        else:
-            return ''
     
     def getWorkerStatus(self, empcode):
         empcode = int(empcode)

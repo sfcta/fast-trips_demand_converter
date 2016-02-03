@@ -4,6 +4,7 @@ from tables import openFile, IsDescription, Filters
 from collections import defaultdict
 import time, random, sys, os
 import pandas as pd
+from tables import openFile
 
 from config import *
 from util_functions import *
@@ -38,7 +39,7 @@ person          = None
 for row in infile.root.records:
     if rownum % 1000000 == 0: print "Read %10d rows" % rownum
     rownum += 1
-
+ 
     if person:
         if person._persid != row['persid']:
             # the previous person is done - write them out
@@ -54,14 +55,45 @@ for row in infile.root.records:
     else:
         # initialize the new person, add the trip
         person = Person(row)
-    
-    
 infile.close()
 print "Read %s in %5.2f mins" % (FILE_INPUT_ABM_DEMAND, (time.time() - start)/60.0)
-
-outfile.close()
 temp_file.close()
 
+print "Reading visitor demand"
+# visitor demand
+if VISITOR_DEMAND_FLAG:
+    for idx, tp in TIMEPERIODS_NUM_TO_STR.iteritems():
+        visit_file_name = os.path.join(VISITOR_DEMAND_DIR, tp.lower()+"VISIT.h5")
+        visit_file = openFile(visit_file_name, "r")
+        visitors = visit_file.get_node("/", "2") # this is the matrix with WLRT trips in it
+        org_zones = visitors.shape[0]
+        des_zones = visitors.shape[1]
+#         print sum(sum(visitors))
+        for i in range(org_zones):
+            for j in range(des_zones):
+                if visitors[i][j] > 0:
+                    num_trips = getIntTrips(visitors[i][j])
+                    for t in range(num_trips):
+                        person_id = 0
+                        otaz = i+1
+                        dtaz = j+1
+                        mode = 'walk-transit-walk'
+                        purpose = 'visitor'
+                        dep_time = chooseTimeFromDistribution(pref_dep_time_dist[tp])
+                        arr_time = -1
+                        time_target = 'departure'
+                         
+                        # person_id,o_taz,d_taz,mode,purpose,departure_time,arrival_time,time_target,vot,PNR_ids
+                        outfile.write("%s,%s,%s,%s,%s,%s,%s,%s,%.2f,%s\n" % 
+                                      (person_id, otaz, dtaz, mode, purpose, 
+                                       convertTripTime(dep_time), convertTripTime(arr_time),
+                                       time_target, -1,''))
+        visit_file.close()
+                    
+outfile.close()
+
+print "Creating household and person files"
+# household and person files
 hfilename = os.path.join(OUTPUT_DIR, FILE_OUT_HH)
 pfilename = os.path.join(OUTPUT_DIR, FILE_OUT_PERSON)
 hh_cols = ['hh_id', 'hh_vehicles', 'hh_income', 'hh_size', 'hh_workers', 'hh_presch', 'hh_elders']
