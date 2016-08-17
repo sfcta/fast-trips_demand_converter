@@ -58,11 +58,35 @@ def getIntTrips(scaling_factor):
     else:
         return multiplier
 
-def convertTripTime(triptime):
+def convertTripTime(triptime, div=60):
     if int(triptime) > 0:
-        hour = int(triptime/60)
-        minute = triptime % 60
+        hour = int(triptime/div)
+        minute = triptime % div
         return '%02d:%02d:00' %(hour,minute)
     else:
         return ''
+
+def calculateVOT(df_row):
+    '''Based on SFCTA RPM-9 Report, p39:
+        - non-work value of time = 2/3 work value of time,
+        - Impose a minimum of $1/hour and a maximum of $50/hour,
+        - Impose a maximum of $5/hour for workers younger than 18 years old.
+    '''
+    if int(df_row['age']) <= 18 and df_row['worker_status'] != 'unemployed':
+        vot = 5
+    if df_row['hh_income']<=0 or df_row['worker_status'] == 'unemployed':
+        vot = 1
+    elif int(df_row['hh_workers'])<=0:
+        vot_w = float(df_row['hh_income'])/(52*40)
+        vot = min(50,vot_w) if df_row['purpose']=='work' else min(50,0.67*vot_w)
+    else:
+        vot_w = (float(df_row['hh_income'])/int(df_row['hh_workers']))/(52*40)
+        vot = min(50,vot_w) if df_row['purpose']=='work' else min(50,0.67*vot_w)
+    
+    return round(vot,2)
+        
+        
+        
+        
+        
     

@@ -171,9 +171,10 @@ class Person(object):
             person_id = str(self._hhid) + '_' + str(self._persid)
             time_target = 'arrival' if trip[Person.IDX_SEGDIR] == 1 else 'departure' 
             vot = trip[Person.IDX_MVOT] if trip[Person.IDX_PURPOSE] in range(1,5) else trip[Person.IDX_OVOT]
-            # person_id,o_taz,d_taz,mode,purpose,departure_time,arrival_time,time_target,vot,PNR_ids
-            outfile.write("%s,%s,%s,%s,%s,%s,%s,%s,%.2f,%s\n" % 
-                          (person_id,trip[Person.IDX_OTAZ], trip[Person.IDX_DTAZ],
+            # person_id,person_trip_id,person_tour_id,o_taz,d_taz,mode,purpose,departure_time,arrival_time,time_target,vot,PNR_ids
+            outfile.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%.2f,%s\n" % 
+                          (person_id,trip[Person.IDX_CURRSEG],trip[Person.IDX_TOUR],
+                           trip[Person.IDX_OTAZ], trip[Person.IDX_DTAZ],
                            self.getTripMode(trip[Person.IDX_TRIPMODE], trip[Person.IDX_SEGDIR]),
                            self.getTripPurpose(trip[Person.IDX_PURPOSE]),
                            convertTripTime(trip[Person.IDX_PREF_DEP]), convertTripTime(trip[Person.IDX_PREF_ARR]),
@@ -185,7 +186,7 @@ class Person(object):
     def getTripPurpose(self, purpcode):
         if purpcode==1: return 'work'
         elif purpcode in [2,3,4]: return 'school'
-        elif purpcode==6: return 'work-based'
+        elif purpcode==6: return 'work_based'
         else: return 'other'
     
     def getTripMode(self, modecode, segdir):
@@ -218,6 +219,6 @@ class Person(object):
     
     def getWorkerStatus(self, empcode):
         empcode = int(empcode)
-        if empcode in [1,3]: return 'full-time'
-        elif empcode in [2,4]: return 'part-time'
+        if empcode in [1,3]: return 'full_time'
+        elif empcode in [2,4]: return 'part_time'
         else: return 'unemployed'
