@@ -173,7 +173,7 @@ class Person(object):
             vot = trip[Person.IDX_MVOT] if trip[Person.IDX_PURPOSE] in range(1,5) else trip[Person.IDX_OVOT]
             # person_id,person_trip_id,person_tour_id,o_taz,d_taz,mode,purpose,departure_time,arrival_time,time_target,vot,PNR_ids
             outfile.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%.2f,%s\n" % 
-                          (person_id,trip[Person.IDX_CURRSEG],trip[Person.IDX_TOUR],
+                          (person_id,str(trip[Person.IDX_TOUR])+'_'+str(trip[Person.IDX_CURRSEG]),trip[Person.IDX_TOUR],
                            trip[Person.IDX_OTAZ], trip[Person.IDX_DTAZ],
                            self.getTripMode(trip[Person.IDX_TRIPMODE], trip[Person.IDX_SEGDIR]),
                            self.getTripPurpose(trip[Person.IDX_PURPOSE]),

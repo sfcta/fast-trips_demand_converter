@@ -1,7 +1,7 @@
 
 
-# INPUT_TYPE = "CHAMP"
-INPUT_TYPE = "CHTS"
+INPUT_TYPE = "CHAMP"
+# INPUT_TYPE = "CHTS"
 
 if INPUT_TYPE=='CHAMP':
     ##### CHAMP

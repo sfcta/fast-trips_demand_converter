@@ -68,6 +68,7 @@ if INPUT_TYPE=="CHAMP":
     print "Reading visitor demand"
     # visitor demand
     if VISITOR_DEMAND_FLAG:
+        visitor_trip_id = 0
         for idx, tp in TIMEPERIODS_NUM_TO_STR.iteritems():
             visit_file_name = os.path.join(VISITOR_DEMAND_DIR, tp.lower()+"VISIT.h5")
             visit_file = openFile(visit_file_name, "r")
@@ -81,6 +82,7 @@ if INPUT_TYPE=="CHAMP":
                         num_trips = getIntTrips(visitors[i][j])
                         for t in range(num_trips):
                             person_id = 0
+                            visitor_trip_id += 1
                             otaz = i+1
                             dtaz = j+1
                             mode = 'walk-transit-walk'
@@ -91,7 +93,7 @@ if INPUT_TYPE=="CHAMP":
                              
                             # person_id,person_trip_id,person_tour_id,o_taz,d_taz,mode,purpose,departure_time,arrival_time,time_target,vot,PNR_ids
                             outfile.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%.2f,%s\n" % 
-                                          (person_id, 1, 1, otaz, dtaz, mode, purpose, 
+                                          (person_id, visitor_trip_id, '', otaz, dtaz, mode, purpose, 
                                            convertTripTime(dep_time), convertTripTime(arr_time),
                                            time_target, -1,''))
             visit_file.close()
@@ -185,7 +187,7 @@ elif INPUT_TYPE=="CHTS":
     trip_df['arrival_time'] = trip_df['arrtm'].apply(convertTripTime, args=(100,))
     trip_df['time_target'] = 'departure'
     trip_df.loc[trip_df['half']==1, 'time_target'] = 'arrival'
-    trip_df['person_trip_id'] = trip_df['half'].astype(str) + '_' + trip_df['tseg'].astype(str)
+    trip_df['person_trip_id'] = trip_df['person_tour_id'].astype(str) + '_' + trip_df['half'].astype(str) + '_' + trip_df['tseg'].astype(str)
     
     trip_df = trip_df.sort_values(['person_id','person_trip_id'])
     trip_cols = ['person_id', 'person_trip_id', 'person_tour_id', 'o_taz', 'd_taz', 'mode', 'purpose', 'departure_time', 'arrival_time', 'time_target', 'vot']
