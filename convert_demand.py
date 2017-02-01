@@ -123,8 +123,6 @@ elif INPUT_TYPE=="CHTS":
     # read in survey files
     hh_df = pd.read_csv(os.path.join(INPUT_DIR, INFILE_HH), sep=' ')
     person_df = pd.read_csv(os.path.join(INPUT_DIR, INFILE_PERSON), sep=' ')
-    tour_df = pd.read_csv(os.path.join(INPUT_DIR, INFILE_TOUR), sep=' ')
-    trip_df = pd.read_csv(os.path.join(INPUT_DIR, INFILE_TRIP), sep=' ')
     
     hh_df = hh_df.rename(columns={'hhno':'hh_id','hhvehs':'hh_vehicles','hhincome':'hh_income','hhsize':'hh_size','hhwkrs':'hh_workers',
                                   'hhcu5':'hh_presch','hh515':'hh_grdsch','hhhsc':'hh_hghsch'})
@@ -148,8 +146,8 @@ elif INPUT_TYPE=="CHTS":
     person_df.loc[person_df['pgend']==2 ,'gender'] = 'female'
     
     person_df['worker_status'] = 'unemployed'
-    person_df.loc[person_df['pwtyp']==1 ,'worker_status'] = 'full_time'
-    person_df.loc[person_df['pwtyp']==2 ,'worker_status'] = 'part_time'
+    person_df.loc[person_df['pwtyp']==1 ,'worker_status'] = 'full-time'
+    person_df.loc[person_df['pwtyp']==2 ,'worker_status'] = 'part-time'
     
     person_df['work_athome'] = 'False'
     person_df['multiple_jobs'] = 'False'
@@ -158,37 +156,82 @@ elif INPUT_TYPE=="CHTS":
     
     person_df['person_id'] = person_df['hh_id'].astype(str) + '_' + person_df['person_id'].astype(str)
     per_cols = ['person_id', 'hh_id', 'age', 'gender', 'worker_status', 'work_athome', 'multiple_jobs', 'transit_pass', 'disability']
-    person_df.to_csv(pfilename, columns=per_cols, index=False)
+    person_df.to_csv(pfilename, columns=per_cols, index=False)    
     
-    ### prepare and write out trip file
-    trip_df = trip_df.loc[trip_df['mode'].isin(range(6,16)),] # keep only transit trips
-    trip_df = trip_df.loc[(trip_df['otaz']>0) & (trip_df['dtaz']>0),]
-    trip_df = trip_df.merge(tour_df[['hhno','pno','tour','parent']], how='left', on=['hhno','pno','tour'])
-    trip_df = trip_df.rename(columns={'hhno':'hh_id','pno':'person_id','otaz':'o_taz','dtaz':'d_taz','tour':'person_tour_id','mode':'survey_mode'})
-    trip_df['person_id'] = trip_df['hh_id'].astype(str) + '_' + trip_df['person_id'].astype(str)
+    if not GPS_TRIPS:
+        tour_df = pd.read_csv(os.path.join(INPUT_DIR, INFILE_TOUR), sep=' ')
+        trip_df = pd.read_csv(os.path.join(INPUT_DIR, INFILE_TRIP), sep=' ')
     
-    # 6=walk local 7=walk lrt 8=walk prem 9=walk ferry 10=walk bart
-    # 11=drive local 12=drive lrt 13=drive prem 14=drive ferry 15=drive bart
-    trip_df['mode'] = 'walk-transit-walk'
-    trip_df.loc[(trip_df['survey_mode'].isin(range(11,16))) & (trip_df['half']==1), 'mode'] = 'PNR-transit-walk'
-    trip_df.loc[(trip_df['survey_mode'].isin(range(11,16))) & (trip_df['half']==2), 'mode'] = 'walk-transit-PNR'
-    
-    trip_df = trip_df.merge(hh_df[['hh_id','hh_income','hh_workers']], how='left', on=['hh_id'])
-    trip_df = trip_df.merge(person_df[['person_id','pptyp','age','worker_status']], how='left', on=['person_id'])
-    trip_df['purpose'] = 'other'
-    trip_df.loc[trip_df['dpurp']==1, 'purpose'] = 'work'
-    trip_df.loc[(trip_df['dpurp']==2) & (trip_df['pptyp']==7), 'purpose'] = 'grade_school'
-    trip_df.loc[(trip_df['dpurp']==2) & (trip_df['pptyp']==6), 'purpose'] = 'high_school'
-    trip_df.loc[(trip_df['dpurp']==2) & (trip_df['pptyp']==5), 'purpose'] = 'college'
-    trip_df.loc[trip_df['parent']>0, 'purpose'] = 'work_based'
-    
-    trip_df['vot'] = trip_df.apply(calculateVOT,axis=1)
-    trip_df['departure_time'] = trip_df['deptm'].apply(convertTripTime, args=(100,))
-    trip_df['arrival_time'] = trip_df['arrtm'].apply(convertTripTime, args=(100,))
-    trip_df['time_target'] = 'departure'
-    trip_df.loc[trip_df['half']==1, 'time_target'] = 'arrival'
-    trip_df['person_trip_id'] = trip_df['person_tour_id'].astype(str) + '_' + trip_df['half'].astype(str) + '_' + trip_df['tseg'].astype(str)
-    
+        ### prepare and write out trip file
+        trip_df = trip_df.loc[trip_df['mode'].isin(range(6,16)),] # keep only transit trips
+        trip_df = trip_df.loc[(trip_df['otaz']>0) & (trip_df['dtaz']>0),]
+        trip_df = trip_df.merge(tour_df[['hhno','pno','tour','parent']], how='left', on=['hhno','pno','tour'])
+        trip_df = trip_df.rename(columns={'hhno':'hh_id','pno':'person_id','otaz':'o_taz','dtaz':'d_taz','tour':'person_tour_id','mode':'survey_mode'})
+        trip_df['person_id'] = trip_df['hh_id'].astype(str) + '_' + trip_df['person_id'].astype(str)
+        
+        # 6=walk local 7=walk lrt 8=walk prem 9=walk ferry 10=walk bart
+        # 11=drive local 12=drive lrt 13=drive prem 14=drive ferry 15=drive bart
+        trip_df['mode'] = 'walk-transit-walk'
+        trip_df.loc[(trip_df['survey_mode'].isin(range(11,16))) & (trip_df['half']==1), 'mode'] = 'PNR-transit-walk'
+        trip_df.loc[(trip_df['survey_mode'].isin(range(11,16))) & (trip_df['half']==2), 'mode'] = 'walk-transit-PNR'
+        
+        trip_df = trip_df.merge(hh_df[['hh_id','hh_income','hh_workers']], how='left', on=['hh_id'])
+        trip_df = trip_df.merge(person_df[['person_id','pptyp','age','worker_status']], how='left', on=['person_id'])
+        trip_df['purpose'] = 'other'
+        trip_df.loc[trip_df['dpurp']==1, 'purpose'] = 'work'
+        trip_df.loc[(trip_df['dpurp']==2) & (trip_df['pptyp']==7), 'purpose'] = 'grade_school'
+        trip_df.loc[(trip_df['dpurp']==2) & (trip_df['pptyp']==6), 'purpose'] = 'high_school'
+        trip_df.loc[(trip_df['dpurp']==2) & (trip_df['pptyp']==5), 'purpose'] = 'college'
+        trip_df.loc[trip_df['parent']>0, 'purpose'] = 'work_based'
+        
+        trip_df['vot'] = trip_df.apply(calculateVOT,axis=1)
+        trip_df['departure_time'] = trip_df['deptm'].apply(convertTripTime, args=(100,))
+        trip_df['arrival_time'] = trip_df['arrtm'].apply(convertTripTime, args=(100,))
+        trip_df['time_target'] = 'departure'
+        trip_df.loc[trip_df['half']==1, 'time_target'] = 'arrival'
+        trip_df['person_trip_id'] = trip_df['person_tour_id'].astype(str) + '_' + trip_df['half'].astype(str) + '_' + trip_df['tseg'].astype(str)
+    else:
+        transit_legs = pd.read_csv(GPS_TRIP_FILE)
+        trip_df = transit_legs.drop_duplicates(['person_id','trip_list_id_num'])[['person_id','trip_list_id_num','A_id','new_A_time','mode']]
+        trip_count = trip_df.groupby('person_id').count().reset_index()
+        trip_df['person_trip_id'] = [item for l in trip_count['trip_list_id_num'].apply(range).tolist() for item in l]
+        trip_df['person_trip_id'] = trip_df['person_trip_id'] + 1
+#         trip_df['person_trip_id'] = trip_df['person_id'].astype(str) + '_' + trip_df['person_trip_id'].astype(str)
+        
+        trip_df = trip_df.rename(columns={'mode':'mode1'})
+        temp_df = transit_legs.drop_duplicates(['person_id','trip_list_id_num'], keep='last')[['person_id','trip_list_id_num','B_id','new_B_time','mode']]
+        trip_df = trip_df.merge(temp_df, on=['person_id','trip_list_id_num'], how='left')
+        trip_df = trip_df.rename(columns={'A_id':'o_taz','B_id':'d_taz','new_A_time':'departure_time','new_B_time':'arrival_time','mode':'mode2'})
+        
+        trip_df['arr_hour'] = trip_df['arrival_time'].apply(lambda x: int(x.split(":")[0]))
+        trip_df['dep_hour'] = trip_df['departure_time'].apply(lambda x: int(x.split(":")[0]))
+        trip_df['time_target'] = 'departure'
+        trip_df.loc[trip_df['arr_hour']<=12, 'time_target'] = 'arrival'
+        
+        trip_df['hh_id'] = trip_df['person_id'].apply(lambda x: int(x.split("_")[0]))
+        trip_df = trip_df.merge(hh_df[['hh_id','hh_income','hh_workers']], how='left', on=['hh_id'])
+        trip_df = trip_df.merge(person_df[['person_id','pptyp','age','worker_status']], how='left', on=['person_id'])
+        trip_df.loc[pd.isnull(trip_df['age']), 'age'] = -1
+        trip_df.loc[pd.isnull(trip_df['hh_workers']), 'hh_workers'] = -1
+        trip_df['tp'] = ''
+        trip_df.loc[(trip_df['dep_hour']>=6) & (trip_df['dep_hour']<=9), 'tp'] = 'AM'
+        
+        trip_df['purpose'] = 'other' # default
+        trip_df.loc[(trip_df['tp']=='AM') & (((trip_df['pptyp']==1)) | (trip_df['pptyp']==2)), 'purpose'] = 'work'
+        trip_df.loc[(trip_df['tp']=='AM') & (trip_df['pptyp']==7), 'purpose'] = 'grade_school'
+        trip_df.loc[(trip_df['tp']=='AM') & (trip_df['pptyp']==6), 'purpose'] = 'high_school'
+        trip_df.loc[(trip_df['tp']=='AM') & (trip_df['pptyp']==5), 'purpose'] = 'college'
+        
+        trip_df['vot'] = trip_df.apply(calculateVOT,axis=1)
+        trip_df['mode'] = 'walk-transit-walk'
+        trip_df.loc[trip_df['mode1'].isin(['PNR_access','KNR_access']), 'mode'] = 'PNR-transit-walk'
+        trip_df.loc[trip_df['mode2'].isin(['PNR_egress','KNR_egress']), 'mode'] = 'walk-transit-PNR'
+        
+        trip_df = trip_df.loc[(pd.notnull(trip_df['o_taz'])) & (pd.notnull(trip_df['d_taz'])),]
+        trip_df[['o_taz','d_taz']] = trip_df[['o_taz','d_taz']].astype(int)
+        
+        
+    trip_df = trip_df.loc[trip_df['person_id'].isin(person_df['person_id']),]
     trip_df = trip_df.sort_values(['person_id','person_trip_id'])
     trip_cols = ['person_id', 'person_trip_id', 'person_tour_id', 'o_taz', 'd_taz', 'mode', 'purpose', 'departure_time', 'arrival_time', 'time_target', 'vot']
     trip_df.to_csv(outfilename, columns=trip_cols, index=False)

@@ -1,7 +1,7 @@
 
 
-INPUT_TYPE = "CHAMP"
-# INPUT_TYPE = "CHTS"
+# INPUT_TYPE = "CHAMP"
+INPUT_TYPE = "CHTS"
 
 if INPUT_TYPE=='CHAMP':
     ##### CHAMP
@@ -34,7 +34,14 @@ elif INPUT_TYPE=='CHTS':
     INFILE_TOUR = "sfcta_chts_tourx_rewt.dat"
     INFILE_TRIP = "sfcta_chts_tripx_rewt.dat"
     
-    OUTPUT_DIR = r"Q:\Model Development\SHRP2-fasttrips\Task3\chts_demand_conversion\version_0.2"
+    OUTPUT_DIR = r"Q:\Model Development\SHRP2-fasttrips\Task3\chts_demand_conversion\version_0.3"
     FILE_OUT_HH = "household.txt"
     FILE_OUT_PERSON = "person.txt"
     FILE_OUT_TRIP = "trip_list.txt"
+    
+    GPS_TRIPS = True
+    if GPS_TRIPS:
+        OUTPUT_DIR = r"Q:\Model Development\SHRP2-fasttrips\Task3\chts_demand_conversion\version_0.4"
+        GPS_TRIP_FILE = r"Q:\Data\Surveys\HouseholdSurveys\CHTS2012\Data\W1_CHTS_GPS_Final_Data_Deliverable_Wearable\CHTS_FToutput_wStopsRoutesTAZ.csv"
+        
+    
