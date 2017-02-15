@@ -192,16 +192,21 @@ elif INPUT_TYPE=="CHTS":
         trip_df['person_trip_id'] = trip_df['person_tour_id'].astype(str) + '_' + trip_df['half'].astype(str) + '_' + trip_df['tseg'].astype(str)
     else:
         transit_legs = pd.read_csv(GPS_TRIP_FILE)
+        transit_legs['A_id'] = transit_legs['A_stop_id']
+        transit_legs['B_id'] = transit_legs['B_stop_id']
+        transit_legs.loc[transit_legs['linkmode']=='access', 'A_id'] = transit_legs.loc[transit_legs['linkmode']=='access', 'A_TAZ']
+        transit_legs.loc[transit_legs['linkmode']=='egress', 'B_id'] = transit_legs.loc[transit_legs['linkmode']=='egress', 'B_TAZ']
         trip_df = transit_legs.drop_duplicates(['person_id','trip_list_id_num'])[['person_id','trip_list_id_num','A_id','new_A_time','mode']]
-        trip_count = trip_df.groupby('person_id').count().reset_index()
-        trip_df['person_trip_id'] = [item for l in trip_count['trip_list_id_num'].apply(range).tolist() for item in l]
-        trip_df['person_trip_id'] = trip_df['person_trip_id'] + 1
+#         trip_count = trip_df.groupby('person_id').count().reset_index()
+#         trip_df['person_trip_id'] = [item for l in trip_count['trip_list_id_num'].apply(range).tolist() for item in l]
+#         trip_df['person_trip_id'] = trip_df['person_trip_id'] + 1
 #         trip_df['person_trip_id'] = trip_df['person_id'].astype(str) + '_' + trip_df['person_trip_id'].astype(str)
         
         trip_df = trip_df.rename(columns={'mode':'mode1'})
         temp_df = transit_legs.drop_duplicates(['person_id','trip_list_id_num'], keep='last')[['person_id','trip_list_id_num','B_id','new_B_time','mode']]
         trip_df = trip_df.merge(temp_df, on=['person_id','trip_list_id_num'], how='left')
-        trip_df = trip_df.rename(columns={'A_id':'o_taz','B_id':'d_taz','new_A_time':'departure_time','new_B_time':'arrival_time','mode':'mode2'})
+        trip_df = trip_df.rename(columns={'A_id':'o_taz','B_id':'d_taz','new_A_time':'departure_time','new_B_time':'arrival_time','mode':'mode2',
+                                          'trip_list_id_num':'person_trip_id'})
         
         trip_df['arr_hour'] = trip_df['arrival_time'].apply(lambda x: int(x.split(":")[0]))
         trip_df['dep_hour'] = trip_df['departure_time'].apply(lambda x: int(x.split(":")[0]))

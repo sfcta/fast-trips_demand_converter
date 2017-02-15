@@ -42,6 +42,6 @@ elif INPUT_TYPE=='CHTS':
     GPS_TRIPS = True
     if GPS_TRIPS:
         OUTPUT_DIR = r"Q:\Model Development\SHRP2-fasttrips\Task3\chts_demand_conversion\version_0.4"
-        GPS_TRIP_FILE = r"Q:\Data\Surveys\HouseholdSurveys\CHTS2012\Data\W1_CHTS_GPS_Final_Data_Deliverable_Wearable\CHTS_FToutput_wStopsRoutesTAZ.csv"
+        GPS_TRIP_FILE = r"Q:\Data\Surveys\HouseholdSurveys\CHTS2012\Data\W1_CHTS_GPS_Final_Data_Deliverable_Wearable\CHTS_FToutput_wTAZ.csv"
         
     
